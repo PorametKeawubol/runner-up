@@ -1,0 +1,4 @@
+WARNING: KICAD_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [D:\runner-up\<frozen importlib._bootstrap_external>:995=>D:\runner-up\<frozen importlib._bootstrap>:488]
+WARNING: KICAD6_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [D:\runner-up\<frozen importlib._bootstrap_external>:995=>D:\runner-up\<frozen importlib._bootstrap>:488]
+WARNING: KICAD7_SYMBOL_DIR environment variable is missing, so the default KiCad symbol libraries won't be searched. @ [D:\runner-up\<frozen importlib._bootstrap_external>:995=>D:\runner-up\<frozen importlib._bootstrap>:488]
+WARNING: Could not load KiCad schematic library "Device", falling back to backup library. @ [d:\runner-up\amp.py:4]
