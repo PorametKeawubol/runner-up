@@ -1,0 +1,63 @@
+###ตอนที่ 1 Single Machine (using Docker)
+##Preparation
+สร้าง Security Group ขึ้นมา ใช้ชื่อว่า server โดยเพิ่ม Inbound rules ดังนี้
+ประเภท: HTTP -> Source: anywhere IPv4
+ประเภท: HTTPs -> Source: anywhere IPv4
+ประเภท: SSH  -> Source: anywhere IPv4
+ประเภท: Custom TCP -> Port: 8111  -> Source: anywhere IPv4
+Elastic IP ที่จอง ให้ทำการจอง Elastic IP 1 ตัว (โดยใน Workshop นี้จะมีการเตรียมให้แล้ว 1 IP ให้นักศึกษาใช้ตัวดังกล่าว และห้ามลบ)
+Import key pairs โดยใช้ public key ของเครื่องเราเอง
+
+##Create Instance
+สร้าง Instance โดยกำหนดดังนี้
+กำหนดชื่อตามความเหมาะสม
+เลือก OS Images เป็น Ubuntu Server 22.04 LTS 64-bit (x86)
+เลือก Instance Type เป็น t2.micro
+กำหนด Key pair เป็น key ที่เรา import เอาไว้ก่อนหน้า
+ทำการ disable การ Auto-assign public IP
+ในส่วนของ Firewall ให้เลือก Security Group ที่สร้างไว้ก่อนหน้า
+เลือก Elastic IP ที่ได้จองเอาไว้ก่อนหน้า และเลือก associate ให้กับ Instance ของเรา
+ssh ubuntu@<<ที่อยู่ของเครื่อง>>
+
+##Setup Instance
+sudo su -
+timedatectl set-timezone Asia/Bangkok
+apt update
+
+##Server Deployment
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add –
+apt-key fingerprint 0EBFCD88
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+systemctl restart getty@tty1.service 
+curl -L "https://github.com/docker/compose/releases/download/v2.2.3/dockercompose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+apt install -y docker-ce docker-ce-cli containerd.io
+git clone https://github.com/suthon-psu/cloud-case-study.git
+cd cloud-case-study
+docker-compose up -d 
+
+##Reverse Proxy Configuration
+apt install -y nginx certbot python3-certbot-nginx
+เข้าไปที่ตำแหน่งของโฟลเดอร /cloud-case-study/others แล้วใช้คำสั่ง cp nginx.conf /etc/nginx/sites-available/server 
+จากนั้น แก้ไขไฟล์ server ด้วย nano
+ln -s /etc/nginx/sites-available/server /etc/nginx/sites-enabled/
+nginx -t
+certbot –-nginx -d <<ชื่อ domain ของเว็บไซต์เรา>>
+systemctl restart nginx
+mkdir /var/www/client
+mkdir /var/www/public
+
+##Client Deployment เปลี่ยน terminal
+git clone https://github.com/suthonpsu/cloud-case-study.git
+cd cloud-case-study
+cd web-client
+npm run build
+scp -r build ubuntu@<<ที่อยู่ของเครื่อง>>:/tmp
+cp -r /tmp/build/* /var/www/client 
+
+##Fixture
+docker exec -it mysql bash 
+mysql -u root -p tick
+sql เพื่อสร้าง table และ insert ข้อมูล (คำสั่ง sql อยู่ใน source code : cloud-casestudy/others at main · suthon-psu/cloud-case-study · GitHub)
+cp -r ~/cloud-case-study/others/public/* /var/www/public
+
