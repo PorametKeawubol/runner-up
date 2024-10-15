@@ -21,7 +21,7 @@ func rot13(text string) string {
 	return result.String()
 }
 
-func main() {
+func maidn() {
 	var option int
 	fmt.Println("Select 2 options")
 	fmt.Println(" - 1 encrypt with ROT 13")
